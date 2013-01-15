@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="ISO-8859-1"?> 
+
+<!--  Campini Caproni N-1 (YASim) BARANGER Emmanuel (Helijah) 2013
+                       updated by Buckaroo 
+
+     sources      : http://en.wikipedia.org/wiki/Caproni_Campini_N.1
+
+     Wingspan     : 15.85 m    ( 52 ft      )
+     Lenght       : 13.10 m    ( 43 ft      )
+     Height       :  4.70 m    ( 15 ft 5 in )
+     Weight       :  3640 kg   ( 8024 lb    )
+     Engines      :   670 kW Isotta Fraschini liquid-cooled V12 engine motorjet, resulting in 1550 lbf
+     Max speed    :   375 km/h (   203 kt  )
+     Ceilling     :  4000 m    ( 13300 ft   )
+-->
+
+<airplane mass="8024">
+
+  <!-- Buck notes:
+       I increased approach speed from 60->80. This gives a more reasonable take-off speed and a more reasonable stall.
+       I changed AoA from 6->10, a little over half stall AoA. It's likely that this plane lands with a significant nose-up attitude,
+       especially since it has no wing incidence.
+       Dropped approach fuel slightly for a better solution 0.3->0.2
+       I reduced the cruise altitude 13300 -> 5000. 13300 is the ceiling, and the piston engine itself doesn't seem to be supercharged
+       (ironic since it's acting as a giant supercharger), so it likely wants to operate best at a lower altitude with denser air. Just
+       a guess. Gives a better solution.
+  -->
+  <approach speed="80" aoa="10" fuel="0.2">
+    <control-setting axis="/controls/engines/engine[0]/throttle" value="0.2"/>
+    <control-setting axis="/controls/flight/flaps" value="1"/>
+    <control-setting axis="/controls/gear/gear-down" value="1"/>
+    <solve-weight idx="0" weight="170"/>
+  </approach>
+
+  <cruise speed="200" alt="5000" fuel="0.7">
+    <control-setting axis="/controls/engines/engine[0]/throttle" value="1"/>
+    <control-setting axis="/controls/flight/flaps" value="0"/>
+    <control-setting axis="/controls/gear/gear-down" value="0"/>
+    <solve-weight idx="0" weight="170"/>
+  </cruise>
+
+  <cockpit x="1.26" y="0.0" z="0.95"/>
+
+  <weight x="1.22" y="0" z="0.43" mass-prop="/yasim/me262/pilot-lb"/>
+  <ballast x="3.9" y="0" z="0.25" mass="900"/>
+
+  <!-- Fuselage with engine on top -->
+  <fuselage ax="6.50646" ay="0" az="0" bx="-6.04757" by="0" bz="0" width="1.631" taper="1" midpoint="0.50"/>
+
+  <!-- Buck notes:
+       I changed stall AoA 20->15. Most airfoils of this period probably had a critical AoA at 16-17 degrees, and I allow a degree or two for YASim's
+       interpolation method. I changed width from 1->6. Airfoils of this period often had nasty sharp stalls, but 1 is almost like having no interpolation at all.
+       I gave the wing an induced drag reduction, since it has a pretty good semi-eliptical shape. Note that increasing idrag actually reduces induced 
+       drag due to a bug in YASim that reverses the context.
+       Increased flap lift and drag for more effect. L 1.2->1.25, D 1.1->1.5
+  -->
+  <wing x="1.17669" y="0.26" z="-0.76"
+        chord="3.858" 
+        length="7.645" 
+        taper="0.4"
+        sweep="0"
+        camber="0.02"
+        idrag="1.15"
+        dihedral="2">
+        <stall aoa="15" width="6" peak="1.5"/>
+        <flap0 start="0.017" end="0.573" lift="1.25" drag="1.5"/>
+        <flap1 start="0.573" end="0.945" lift="1.2" drag="1.1"/>
+
+        <control-input axis="/controls/flight/flaps" control="FLAP0"/> 
+        <control-input axis="/controls/flight/aileron" control="FLAP1" square="true" split="true"/> 
+        <control-input axis="/controls/flight/aileron-trim" control="FLAP1" split="true"/>
+
+        <control-output control="FLAP0" side="left" prop="/surface-positions/left-flap-pos-norm"/>
+        <control-output control="FLAP0" side="right" prop="/surface-positions/right-flap-pos-norm"/>
+        <control-output control="FLAP0" prop="/surface-positions/flap-pos-norm"/>
+
+        <control-output control="FLAP1" side="left" prop="/surface-positions/left-aileron-pos-norm"/>
+        <control-output control="FLAP1" side="right" prop="/surface-positions/right-aileron-pos-norm"/>
+        <control-output control="FLAP1" prop="/surface-positions/aileron-pos-norm"/>
+
+        <control-speed control="FLAP0" transition-time="30"/>
+  </wing>
+
+  <!-- Buck notes:
+       Removed the "side" attribute of the control-output. Looked like a copy-and-paste mistake.
+       Increased widths 1->4
+       Changed hstab lift as necessary.
+  -->
+  <hstab x="-4.26152" y="0" z="0.68"
+         chord="3.086" 
+         length="3.237" 
+         taper="0.3"
+         sweep="12">
+         <stall aoa="18" width="4" peak="1.5"/>
+         <flap0 start="0.1" end="0.94" lift="1.68" drag="1.2"/>
+
+         <control-input axis="/controls/flight/elevator" square="false" control="FLAP0" />
+         <control-input axis="/controls/flight/elevator-trim" control="FLAP0"/>
+
+         <control-output control="FLAP0" prop="/surface-positions/elevator-pos-norm"/>
+  </hstab>
+
+  <vstab x="-4.11084" y="0" z="0.138"
+         chord="3.2" 
+         length="2.557" 
+         taper="0.20"
+         sweep="28">
+         <stall aoa="16" width="4" peak="1.5"/>
+         <flap0 start="0.05" end="1" lift="1.3" drag="1.1"/>
+
+         <control-input axis="/controls/flight/rudder" control="FLAP0" invert="true"/>
+         <control-input axis="/controls/flight/rudder-trim" control="FLAP0" invert="true"/>
+
+         <control-output control="FLAP0" prop="/surface-positions/rudder-pos-norm"/>
+  </vstab>
+
+  <!--  MotorJet -->
+  <jet x="1.86" y="0" z="-0.59"
+       n1-idle="30" 
+       n1-max="90" 
+       n2-idle="35" 
+       n2-max="95"
+       egt="850" 
+       tsfc="1.39"
+       mass="1268"
+       thrust="1550">
+       <actionpt x="6.07169" y="0" z="-0.59"/>
+       <control-input axis="/controls/engines/engine[0]/throttle" control="THROTTLE"/>
+  </jet>
+  
+  <!-- Undercarriage -->
+  <!-- left main -->
+  <gear x="2.21015" y="2.10750" z="-2.37812"
+        retract-time="7"
+        compression="0.30"
+        spring="1"
+        damp="2">
+        <control-input axis="/controls/gear/brake-left" control="BRAKE"/>
+        <control-input axis="/controls/gear/brake-parking" control="BRAKE"/>
+        <control-input axis="/controls/gear/gear-down" control="EXTEND"/>
+
+        <control-output control="EXTEND" prop="/gear/gear[1]/position-norm"/>
+
+        <control-speed control="EXTEND" transition-time="7"/>
+  </gear>
+
+  <!-- right main -->
+  <gear x="2.21015" y="-2.10750" z="-2.37812"
+        retract-time="7"
+        compression="0.30"
+        spring="1"
+        damp="2">
+        <control-input axis="/controls/gear/brake-right" control="BRAKE"/>
+        <control-input axis="/controls/gear/brake-parking" control="BRAKE"/>
+        <control-input axis="/controls/gear/gear-down" control="EXTEND"/>
+
+        <control-output control="EXTEND" prop="/gear/gear[2]/position-norm"/>
+
+        <control-speed control="EXTEND" transition-time="7"/>
+  </gear>
+
+  <!-- nose -->
+  <gear x="-3.43910" y="0" z="-1.3107"
+        retract-time="7"
+        compression="0.30"
+        spring="1"
+        damp="2">
+        <control-input axis="/controls/flight/rudder" control="STEER" src0="-1.0" src1="1.0" dst0="0.1" dst1="-0.1"/>
+        <control-input axis="/controls/gear/gear-down" control="EXTEND"/>
+
+        <control-output control="EXTEND" prop="/gear/gear[0]/position-norm"/>
+
+        <control-speed control="EXTEND" transition-time="7"/>
+  </gear>
+
+  <!-- Internal tanks 2 x 280 liter wings -->
+  <tank x="1.4" y=" 2.3" z="-0.7" jet="true" capacity="1250"/>
+  <tank x="1.4" y="-2.3" z="-0.7" jet="true" capacity="1250"/>
+
+
+  <!-- Buck notes:
+       Rebalanced CG slightly (x=1.820). Just a guess, but feels OK.
+  -->
+  <!-- Mass displacment -->
+  <ballast x="4" y="0" z="-1.55" mass="2300"/>
+
+</airplane>
